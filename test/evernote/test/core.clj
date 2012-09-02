@@ -1,5 +1,5 @@
-(ns clj-evernote.test.core
-  (:use [clj-evernote.core])
+(ns evernote.test.core
+  (:use [evernote.core])
   (:use [clojure.test]))
 
 (deftest replace-me ;; FIXME: write

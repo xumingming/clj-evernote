@@ -15,13 +15,14 @@
   [note-store name]
   (let [notebook (doto (Notebook.)
                    (.setName name))]
-    (.createNotebook (:store note-store) (:dev-token note-store) notebook)))
+    (.createNotebook ^NoteStore$Client (:store note-store) (:dev-token note-store) notebook)))
 
 (defn list-notebooks 
   "Lists all the notebooks for the current user."
   {:added "0.1"}
   [note-store]
-  (let [^List notebooks (.listNotebooks (:store note-store) (:dev-token note-store))
+  (let [^List notebooks (.listNotebooks ^NoteStore$Client (:store note-store)
+                                        (:dev-token note-store))
         notebooks (map java->clj notebooks)
         notebooks (vec notebooks)]
     notebooks))
@@ -45,7 +46,8 @@
                (.setTitle title)
                (.setContent content))]
     (try
-      (.createNote (:store note-store) (:dev-token note-store) note)
+      (.createNote ^NoteStore$Client (:store note-store)
+                   (:dev-token note-store) note)
       (catch EDAMUserException e
         (println e)))))
 
@@ -53,14 +55,14 @@
   "Gets a note"
   {:added "0.1"}
   [note-store guid & {:keys [with-content]}]
-  (let [note (.getNote (:store note-store) (:dev-token note-store) guid true false false false)]
+  (let [note (.getNote ^NoteStore$Client (:store note-store) (:dev-token note-store) guid true false false false)]
     note))
 
 (defn get-note-content
   "Gets the content of a specified note(guid)."
   {:added "0.1"}
   [note-store guid]
-  (let [content (.getNoteContent (:store note-store) (:dev-token note-store) guid)]
+  (let [content (.getNoteContent ^NoteStore$Client (:store note-store) (:dev-token note-store) guid)]
     content))
 
 (defn update-note
@@ -68,14 +70,15 @@
   {:added "0.1"}
   [note-store note]
   (let [note (clj->java note)]
-    (.updateNote (:store note-store) (:dev-token note-store) note)))
+    (.updateNote ^NoteStore$Client (:store note-store) (:dev-token note-store) note)))
 
 (defn delete-note
   "Deletes a specified note."
   {:added "0.1"}
   [note-store note guid]
   (let []
-    (.deleteNote (:store note-store) (:dev-token note-store) guid)))
+    (.deleteNote ^NoteStore$Client (:store note-store)
+                 (:dev-token note-store) guid)))
 
 (defn find-notes
   "Finds notes for the specified condition."
@@ -83,7 +86,8 @@
   [note-store & {:keys [notebook-guid]}]
   (let [jfilter (doto (NoteFilter.)
                   (.setNotebookGuid notebook-guid))
-        ^NoteList note-list (.findNotes (:store note-store) (:dev-token note-store) jfilter 0 100)
+        ^NoteList note-list (.findNotes ^NoteStore$Client (:store note-store)
+                                        (:dev-token note-store) jfilter 0 100)
         notes (.getNotes note-list)
         notes (map java->clj notes)]
     notes))
@@ -110,8 +114,9 @@
    :notebook-guid (.getNotebookGuid note)})
 
 
-(defn clj->java
-  [note]
+(defmulti clj->java (fn [type & _] type))
+(defmethod clj->java :note
+  [type note]
   (doto (Note.)
     (.setGuid (:guid note))
     (.setTitle (:title note))
@@ -119,6 +124,15 @@
     (.setContentLength (:content-length note))
     (.setUpdated (:updated-at note))
     (.setNotebookGuid (:notebook-guid note))))
+
+(defmethod clj->java :notebook
+  [type notebook]
+  (doto (Notebook.)
+    (.setGuid (:guid notebook))
+    (.setName (:name notebook))
+    (.setDefaultNotebook (:default? notebook))
+    (.setServiceCreated (:created-at notebook))
+    (.setServiceUpdated (:updated-at notebook))))
     
 (defn get-user-store [user-store-url]
   (let [http-client (THttpClient. user-store-url)
@@ -128,7 +142,7 @@
 
 (defn get-note-store [user-store-url dev-token]
   (let [user-store (get-user-store user-store-url)
-        note-store-url (.getNoteStoreUrl user-store dev-token)
+        note-store-url (.getNoteStoreUrl ^UserStore$Client user-store dev-token)
         note-store-trans (THttpClient. note-store-url)
         _ (.setCustomHeader note-store-trans "User-Agent" "everbox (https://github.com/xumingming/everbox)")
         note-store-prot (TBinaryProtocol. note-store-trans)
