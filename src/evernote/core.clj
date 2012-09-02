@@ -15,10 +15,11 @@
   "Creates a notebook with the specified name."
   {:added "0.1"}
   [note-store name]
-  (let [notebook (doto (Notebook.)
-                   (.setName name))]
-    (.createNotebook ^NoteStore$Client (:store note-store)
-                     (:dev-token note-store) notebook)))
+  (let [java-notebook (doto (Notebook.)
+                        (.setName name))
+        java-notebook (.createNotebook ^NoteStore$Client (:store note-store)
+                                       (:dev-token note-store) java-notebook)]
+    (java->clj java-notebook)))
 
 (defn list-notebooks 
   "Lists all the notebooks for the current user."
@@ -40,19 +41,19 @@
   "Creates a note with the specified title and content"
   {:added "0.1"}
   [note-store title content]
-  (let [
-        ;; TODO refactor the content format
-        content (str "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+  ;; TODO refactor the content format
+  (let [content (str "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">
 <en-note>" content "</en-note>")
-        note (doto (Note.)
-               (.setTitle title)
-               (.setContent content))]
-    (try
-      (.createNote ^NoteStore$Client (:store note-store)
-                   (:dev-token note-store) note)
-      (catch EDAMUserException e
-        (println e)))))
+        java-note (doto (Note.)
+                    (.setTitle title)
+                    (.setContent content))
+        java-note (try
+                    (.createNote ^NoteStore$Client (:store note-store)
+                                 (:dev-token note-store) java-note)
+                    (catch EDAMUserException e
+                      (println e)))]
+    (java->clj java-note)))
 
 (defn get-note 
   "Gets a note"
