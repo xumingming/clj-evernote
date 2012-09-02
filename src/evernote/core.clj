@@ -17,7 +17,8 @@
   [note-store name]
   (let [notebook (doto (Notebook.)
                    (.setName name))]
-    (.createNotebook ^NoteStore$Client (:store note-store) (:dev-token note-store) notebook)))
+    (.createNotebook ^NoteStore$Client (:store note-store)
+                     (:dev-token note-store) notebook)))
 
 (defn list-notebooks 
   "Lists all the notebooks for the current user."
@@ -57,14 +58,16 @@
   "Gets a note"
   {:added "0.1"}
   [note-store guid & {:keys [with-content]}]
-  (let [note (.getNote ^NoteStore$Client (:store note-store) (:dev-token note-store) guid true false false false)]
+  (let [note (.getNote ^NoteStore$Client (:store note-store)
+                       (:dev-token note-store) guid true false false false)]
     note))
 
 (defn get-note-content
   "Gets the content of a specified note(guid)."
   {:added "0.1"}
   [note-store guid]
-  (let [content (.getNoteContent ^NoteStore$Client (:store note-store) (:dev-token note-store) guid)]
+  (let [content (.getNoteContent ^NoteStore$Client (:store note-store)
+                                 (:dev-token note-store) guid)]
     content))
 
 (defn update-note
@@ -72,15 +75,15 @@
   {:added "0.1"}
   [note-store note]
   (let [note (clj->java note)]
-    (.updateNote ^NoteStore$Client (:store note-store) (:dev-token note-store) note)))
+    (.updateNote ^NoteStore$Client (:store note-store)
+                 (:dev-token note-store) note)))
 
 (defn delete-note
   "Deletes a specified note."
   {:added "0.1"}
-  [note-store note guid]
-  (let []
-    (.deleteNote ^NoteStore$Client (:store note-store)
-                 (:dev-token note-store) guid)))
+  [note-store guid]
+  (.deleteNote ^NoteStore$Client (:store note-store)
+               (:dev-token note-store) guid))
 
 (defn find-notes
   "Finds notes for the specified condition."
