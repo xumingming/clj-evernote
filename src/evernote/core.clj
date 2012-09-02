@@ -1,4 +1,6 @@
-(ns evernote.core
+(ns ^{:doc "Evernote Clojure API"
+      :author "xumingming"}
+  evernote.core
   (:import [java.util List])
   (:import [org.apache.thrift.transport THttpClient])
   (:import [org.apache.thrift.protocol TBinaryProtocol])
