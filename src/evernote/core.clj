@@ -128,6 +128,8 @@
     (.setContent (:content note))
     (.setContentLength (:content-length note))
     (.setUpdated (:updated-at note))
+    (.setActive (:active? note))
+    (.setUpdateSequenceNum (:update-seq-num note))
     (.setNotebookGuid (:notebook-guid note))))
 
 (defmethod clj->java :notebook
@@ -135,6 +137,7 @@
   (doto (Notebook.)
     (.setGuid (:guid notebook))
     (.setName (:name notebook))
+    (.setUpdateSequenceNum (:update-seq-num notebook))
     (.setDefaultNotebook (:default? notebook))
     (.setServiceCreated (:created-at notebook))
     (.setServiceUpdated (:updated-at notebook))))
