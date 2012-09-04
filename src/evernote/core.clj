@@ -48,7 +48,6 @@
         java-note (doto (Note.)
                     (.setTitle title)
                     (.setContent content))
-        _ (println "Java note: " java-note)
         java-note (try
                     (.createNote ^NoteStore$Client (:store note-store)
                                  (:dev-token note-store) java-note)
